@@ -13,12 +13,12 @@
 | Extension       | DownloadBinary 下载的文件扩展名             | "tar.bz2","zip","7z"                      |                                                              |
 | BuildArches     | 构建平台架构                                |                                           | win-x86;win-x64;win-arm64                                    |
 | SevenZipExePath | 7zip解压程序路径                            |                                           | C:\Program Files\7-Zip\7z.exe<br />C:\\Software\\Common\\7-Zip\\7z.exe |
-|                 |                                             |                                           |                                                              |
+| Suffix          | 版本后缀                                    |                                           | 为 "" 或 $null 或 0 z则不添加                                |
 |                 |                                             |                                           |                                                              |
 
 # 本地二进制编译调用
 
 ```powershell
-.\build.ps1 -Target nupkg-only" -DownloadBinary "local" -CefBinaryDir "../cef-binary-source/" -Extension "zip" -CefVersion "134.3.8+gfe66d80+chromium-134.0.6998.166" -SevenZipExePath "C:\\Software\\Common\\7-Zip\\7z.exe" -NoDebugBuild true
+.\build.ps1 -Target "nupkg" -DownloadBinary "local" -CefBinaryDir "../cef-binary-source/" -Extension "zip" -CefVersion "134.3.60+gfe66d80+chromium-134.0.6998.166" -SevenZipExePath "C:\\Software\\Common\\7-Zip\\7z.exe" -Suffix ""
 ```
 
