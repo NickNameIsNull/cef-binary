@@ -19,6 +19,6 @@
 # 本地二进制编译调用
 
 ```powershell
-.\build.ps1 -Target "nupkg" -DownloadBinary "local" -CefBinaryDir "/cefsource/" -Extension "zip" -CefVersion "134.3.8+gfe66d80+chromium-134.0.6998.166" -SevenZipExePath "C:\\Software\\Common\\7-Zip\\7z.exe"
+.\build.ps1 -Target nupkg-only" -DownloadBinary "local" -CefBinaryDir "../cef-binary-source/" -Extension "zip" -CefVersion "134.3.8+gfe66d80+chromium-134.0.6998.166" -SevenZipExePath "C:\\Software\\Common\\7-Zip\\7z.exe" -NoDebugBuild true
 ```
 
