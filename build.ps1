@@ -11,6 +11,7 @@ param(
 
 	[Parameter(Position = 2)]
 	# absolute or relative path to directory containing cef binaries archives (used if DownloadBinary = local)
+	# 包含cef二进制文件存档的目录的绝对或相对路径（在DownloadBinary = local时使用）
 	[string] $CefBinaryDir = "../cefsource/chromium/src/cef/binary_distrib/",
 
 	[Parameter(Position = 3)]
@@ -27,7 +28,11 @@ param(
 	[string] $Suffix,
 
 	[Parameter(Position = 7)]
-	[string] $BuildArches = "win-x86;win-x64;win-arm64"
+	[string] $BuildArches = "win-x86;win-x64;win-arm64",
+
+    [Parameter(Position = 8)]
+	# 使用7zip解压，非默认路径安装7zip需指定绝对路径
+	[string] $SevenZipExePath = "C:\Program Files\7-Zip\7z.exe"
 )
 
 Set-StrictMode -version latest
@@ -72,12 +77,16 @@ function Invoke-BatchFile
 	# NOTE: A better solution would be to use PSCX's Push-EnvironmentBlock before calling
 	# this and popping it before calling this function again as repeated use of this function
 	# can (unsurprisingly) cause the PATH variable to max out at Windows upper limit.
+	# 注：一个更好的解决方案是在调用之前使用PSCX的Push-EnvironmentBlock
+	# this并在再次调用这个函数之前弹出它，作为重复使用这个函数
+	#可以（不出所料）导致PATH变量达到Windows上限。
 	$batFile = [IO.Path]::GetTempFileName() + '.cmd'
 	Set-Content -Path $batFile -Value "`"$Path`" $Parameters && set > `"$tempFile`"`r`n"
 
 	& $batFile
 
 	#Brace must be on same line for foreach-object to work
+	#大括号必须在同一行，foreach-object才能工作
 	Get-Content $tempFile | Foreach-Object {
 		if ($_ -match "^(.*?)=(.*)$")
 		{
@@ -113,7 +122,7 @@ function Warn
 	Write-Host
 
 }
-
+# 下载依赖关系
 function DownloadDependencies()
 {
 	$folder = Join-Path $env:LOCALAPPDATA .\nuget;
@@ -136,15 +145,18 @@ function DownloadDependencies()
 		$global:VSWherePath = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
 	}
 
-	#Check if we already have vswhere which is included in newer versions of VS2019/VS2022
+	# Check if we already have vswhere which is included in newer versions of VS2019/VS2022
+	# 检查我们是否已经在VS2019/VS2022的新版本中包含了vswhere
 	if(-not (Test-Path $global:VSwherePath))
 	{
 		Write-Diagnostic "Downloading VSWhere as no install found at $global:VSwherePath"
 		
 		# Check if we already have a local copy and download if required
+		# 检查我们是否已经有一个本地副本，如果需要下载
 		$global:VSwherePath = Join-Path $WorkingDir \vswhere.exe
 		
 		# TODO: Check hash and download if hash differs
+		# TODO：检查哈希值，如果哈希值不同就下载
 		if(-not (Test-Path $global:VSwherePath))
 		{
 			$client = New-Object System.Net.WebClient;
@@ -171,12 +183,14 @@ function WriteVersionToRuntimeJson
 function CheckDependencies()
 {
 	# Check for cmake
+	# #检查cmake
 	if ($null -eq (Get-Command "cmake.exe" -ErrorAction SilentlyContinue))
 	{
 		Die "Unable to find cmake.exe in your PATH"
 	}
 
 	# Check for 7zip
+	# #检查7zip
 	if (-not (test-path "$env:ProgramFiles\7-Zip\7z.exe"))
 	{
 		Die "$env:ProgramFiles\7-Zip\7z.exe is required"
@@ -476,7 +490,7 @@ function ExtractArchive()
 		[string] $OutputFolder
 	)
 
-	set-alias sz "$env:ProgramFiles\7-Zip\7z.exe"
+	set-alias sz $SevenZipExePath
 
 	# Extract bzip file
 	sz x $ArchivePath;
@@ -675,7 +689,7 @@ try
 		$CefPackageVersion = $CefPackageVersion + '-' + $Suffix
 	}
 
-	CheckDependencies
+	# CheckDependencies
 	DownloadDependencies
 	WriteVersionToRuntimeJson
 
@@ -725,6 +739,7 @@ try
 			}
 		}
 
+		
 		Bootstrap $platform
 	}
 
